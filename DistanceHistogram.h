@@ -2,13 +2,13 @@
 #define DISTANCE_HISTOGRAM_H
 
 #include "Header.h"
-#include "Polygon.h"
+#include "CurveString.h"
 
 class DistanceHistogram
 {
   private:
     //! the curve that is abstracted
-    Curve *curve;
+    CurveString curve_string;
 
     //! list of points
     vector<Point<double>> point_set;
@@ -17,7 +17,7 @@ class DistanceHistogram
     void constructSamples(int);
  
     //! Compute number of internal points
-    int computeNumberOfPointsWithinCircle(Point<double> &, double);
+    int computeNumberOfInternalPoints(Point<double> &, double);
 
   public:
     //! Null constructor
@@ -33,7 +33,7 @@ class DistanceHistogram
     DistanceHistogram operator=(const DistanceHistogram &);
 
     //! Compute the local histogram function
-    vector<double> computeLocalHistogram(int, double);
+    vector<double> computeLocalHistogram(double);
 
     //! Compute the global histogram function
     double computeGlobalHistogram(double);

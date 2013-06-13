@@ -1,4 +1,4 @@
-#include "Polygon.h"
+#include "CurveString.h"
 #include "DistanceHistogram.h"
 
 int main(int argc, char **argv)
@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   points.push_back(p3);
   points.push_back(p4);
   points.push_back(p1);
-  Polygon square(points);
+  CurveString square(points);
   points.clear();
 
   double sqrt_2 = sqrt(2);
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   points.push_back(p3);
   points.push_back(p4);
   points.push_back(p1);
-  Polygon rhombus(points);
+  CurveString rhombus(points);
   points.clear();
 
   p1 = Point<double>(0,0,0);
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   points.push_back(p3);
   points.push_back(p4);
   points.push_back(p1);
-  Polygon rectangle(points);
+  CurveString rectangle(points);
   points.clear();
 
   Curve *c1 = &square;

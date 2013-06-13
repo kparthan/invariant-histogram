@@ -8,9 +8,10 @@ DistanceHistogram::DistanceHistogram()
 
 /*!
  *  \brief This is a constructor module.
- *  \param curve a pointer to a Curve 
+ *  \param curve_string a reference to a CurveString
  */
-DistanceHistogram::DistanceHistogram(Curve *curve) : curve(curve)
+DistanceHistogram::DistanceHistogram(CurveString &curve_string) : 
+                   curve_string(curve_string)
 {}
 
 /*!
@@ -18,7 +19,7 @@ DistanceHistogram::DistanceHistogram(Curve *curve) : curve(curve)
  *  \param source a reference to a DistanceHistogram
  */
 DistanceHistogram::DistanceHistogram(const DistanceHistogram &source) :
-                   curve(source.curve), point_set(source.point_set)
+                   curve_string(source.curve_string), point_set(source.point_set)
 {}
 
 /*!
@@ -29,7 +30,7 @@ DistanceHistogram::DistanceHistogram(const DistanceHistogram &source) :
 DistanceHistogram DistanceHistogram::operator=(const DistanceHistogram &source)
 {
   if (this != &source) {
-    curve = source.curve;
+    curve_string = source.curve_string;
     point_set = source.point_set;
   }
   return *this;
@@ -42,7 +43,7 @@ DistanceHistogram DistanceHistogram::operator=(const DistanceHistogram &source)
  */
 void DistanceHistogram::constructSamples(int num_points)
 {
-  point_set = curve->generateRandomPoints(num_points);
+  point_set = curve_string.generateRandomPoints(num_points);
 }
 
 /*!
@@ -52,32 +53,31 @@ void DistanceHistogram::constructSamples(int num_points)
  *  \param r a double
  *  \param number of internal point_set
  */
-int DistanceHistogram::computeNumberOfPointsWithinCircle(Point<double> &centre,
-                                                         double r)
+int DistanceHistogram::computeNumberOfInternalPoints(Point<double> &centre,
+                                                     double r)
 {
-  int num_point_set = 0;
+  int count = 0;
   for (int i=0; i<point_set.size(); i++) {
     double distance = lcb::geometry::distance<double>(centre,point_set[i]);
     if (distance <= r) {
-      num_point_set++;
+      count++;
     }
   }
-  return num_point_set;
+  return count;
 }
 
 /*!
  *  \brief This function is used to calculate the local histogram function
  *  value for a given value of r.
- *  \param index an integer
  *  \param r a double
  *  \return the local histogram function values
  */
-vector<double> DistanceHistogram::computeLocalHistogram(int index, double r)
+vector<double> DistanceHistogram::computeLocalHistogram(double r)
 {
   vector<double> local_histogram(point_set.size());
   for (int i=0; i<point_set.size(); i++) {
-    int num_point_set_within = computeNumberOfPointsWithinCircle(point_set[i],r);
-    local_histogram[i] = num_point_set_within / (double) point_set.size();
+    int num_internal_points = computeNumberOfPointsWithinCircle(point_set[i],r);
+    local_histogram[i] = num_internal_points / (double) point_set.size();
   }
   return local_histogram;
 }
@@ -90,11 +90,9 @@ vector<double> DistanceHistogram::computeLocalHistogram(int index, double r)
 double DistanceHistogram::computeGlobalHistogram(double r)
 {
   double global_histogram = 0;
+  vector<double> local_histogram = computeLocalHistogram(r);
   for (int i=0; i<point_set.size(); i++) {
-    vector<double> local_histogram = computeLocalHistogram(i,r);
-    for (int j=0; j<local_histogram.size(); j++) {
-      global_histogram += local_histogram[j];
-    }
+    global_histogram += local_histogram;
   }
   return global_histogram / point_set.size();
 }

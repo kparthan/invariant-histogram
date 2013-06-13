@@ -2,8 +2,7 @@ CFLAGS=-std=c++0x -g $(shell pkg-config --cflags liblcb-experimental)
 LDFLAGS=$(shell pkg-config --libs liblcb-experimental) -lboost_program_options
 
 OBJECTS = invariant-histogram.o \
-  Curve.o \
-  Polygon.o \
+  CurveString.o \
   DistanceHistogram.o \
 
 all: invariant-histogram 
@@ -14,10 +13,7 @@ invariant-histogram: $(OBJECTS)
 invariant-histogram.o: invariant-histogram.cpp Header.h Polygon.h DistanceHistogram.h 
 	g++ -c $(CFLAGS) $< -o $@
 
-Curve.o: Curve.cpp Curve.h
-	g++ -c $(CFLAGS) $< -o $@
-
-Polygon.o: Polygon.cpp Polygon.h
+CurveString.o: CurveString.cpp CurveString.h
 	g++ -c $(CFLAGS) $< -o $@
 
 DistanceHistogram.o: DistanceHistogram.cpp DistanceHistogram.h
