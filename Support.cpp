@@ -57,11 +57,11 @@ void compareResults()
   script << "set yr [0:1.5]" << endl;
   script << "set output \"output/histogram_comparison.eps\"" << endl;
   script << "set multiplot" << endl;
-  script << "plot \"output/square.results\" using 1:2 title"
+  script << "plot \"output/square.results\" using 1:2 title "
          << "'square' with points lc rgb \"red\", \\" << endl;
-  script << "\"output/rhombus.results\" using 1:2 title"
+  script << "\"output/rhombus.results\" using 1:2 title "
          << "'rhombus' with points lc rgb \"blue\", \\" << endl;
-  script << "\"output/rectangle.results\" using 1:2 title"
+  script << "\"output/rectangle.results\" using 1:2 title "
          << "'rectangle' with points lc rgb \"green\"" << endl;
   script.close();
   system("gnuplot -persist script.plot");

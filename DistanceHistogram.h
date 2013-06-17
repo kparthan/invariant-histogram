@@ -50,7 +50,7 @@ class DistanceHistogram
 
     //! Compute the global histogram values for given values of r
     pair<vector<double>,vector<double>> 
-    omputeGlobalHistogramValues(vector<double> &, int);
+    computeGlobalHistogramValues(vector<double> &, int);
 };
 
 #endif
