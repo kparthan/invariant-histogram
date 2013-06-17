@@ -7,10 +7,10 @@
 class DistanceHistogram
 {
   private:
-    //! the curve that is abstracted
+    //! The polygon used 
     Polygon polygon;
 
-    //! list of points
+    //! List of points
     vector<Point<double>> point_set;
 
     //! Sample points on the curve
@@ -35,7 +35,7 @@ class DistanceHistogram
     //! Assignment operator
     DistanceHistogram operator=(const DistanceHistogram &);
 
-    //!
+    //! Gets the generated random samples
     vector<Point<double>> getSamples();
 
     //! Compute the local histogram function
@@ -45,10 +45,12 @@ class DistanceHistogram
     double computeGlobalHistogram(double);
 
     //! Compute the global histogram values for several values of r
-    pair<vector<double>,vector<double>> computeGlobalHistogramValues();
+    pair<vector<double>,vector<double>> 
+    computeGlobalHistogramValues(int);
 
     //! Compute the global histogram values for given values of r
-    pair<vector<double>,vector<double>> computeGlobalHistogramValues(vector<double> &);
+    pair<vector<double>,vector<double>> 
+    omputeGlobalHistogramValues(vector<double> &, int);
 };
 
 #endif

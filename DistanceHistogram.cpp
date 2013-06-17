@@ -10,8 +10,7 @@ DistanceHistogram::DistanceHistogram()
  *  \brief This is a constructor module.
  *  \param polygon a reference to a Polygon
  */
-DistanceHistogram::DistanceHistogram(Polygon &polygon) : 
-                   polygon(polygon)
+DistanceHistogram::DistanceHistogram(Polygon &polygon) : polygon(polygon)
 {}
 
 /*!
@@ -53,12 +52,12 @@ void DistanceHistogram::constructSamples(int num_points)
 void DistanceHistogram::constructSamples()
 {
   int num_points = polygon.length() * POINTS_PER_UNIT;
-
   constructSamples(num_points);
 }
 
 /*!
- *
+ *  \brief This function returns the random points generated on the polygon.
+ *  \return the generated samples 
  */
 vector<Point<double>> DistanceHistogram::getSamples()
 {
@@ -119,9 +118,11 @@ double DistanceHistogram::computeGlobalHistogram(double r)
 /*!
  *  \brief This function computes the global histogram values for different
  *  values of r
+ *  \param num_points an integer
  *  \return the list of distance histogram values
  */
-pair<vector<double>,vector<double>> DistanceHistogram::computeGlobalHistogramValues()
+pair<vector<double>,vector<double>> 
+DistanceHistogram::computeGlobalHistogramValues(int num_points)
 {
   double dr = 0.05;
   double length = polygon.length();
@@ -134,25 +135,28 @@ pair<vector<double>,vector<double>> DistanceHistogram::computeGlobalHistogramVal
     r_values.push_back(r);
     r += dr;
   }
-  return computeGlobalHistogramValues(r_values);
+  return computeGlobalHistogramValues(r_values,num_points);
 }
 
 /*!
  *  \brief This function computes the global histogram values for different
  *  values of r in the provided list
  *  \param r a reference to a vector<double>
+ *  \param num_points an integer
  *  \return the list of distance histogram values
  */
-pair<vector<double>,vector<double>> DistanceHistogram::computeGlobalHistogramValues(vector<double> &r)
+pair<vector<double>,vector<double>> 
+DistanceHistogram::computeGlobalHistogramValues(vector<double> &r, int num_points)
 {
-  constructSamples();
-  //ofstream results("results/histogram");
+  if (num_points == 0) {
+    constructSamples();
+  } else {
+    constructSamples(num_points);
+  }
   vector<double> values(r.size(),0);
   for (int i=0; i<r.size(); i++) {
     values[i] = computeGlobalHistogram(r[i]);
-    //results << r[i] << " " << values[i] << endl;
   }
-  //results.close();
   pair<vector<double>,vector<double>> results;
   results.first = r;
   results.second = values;

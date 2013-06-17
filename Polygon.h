@@ -9,16 +9,13 @@ class Polygon
     //! Vertices of the polygon 
     vector<Point<double>> vertices;
 
-    //! Sample points on the polygon 
-    vector<Point<double>> samples;
-
     //! Set of line segments
     vector<Line<double>> sides;
 
-    //! Lengths of the curves
+    //! Lengths of the line segments 
     vector<double> lengths;
 
-    //! Select a curve
+    //! Select a side
     int getCurveIndex(double, vector<double> &);
 
   public:
@@ -55,8 +52,8 @@ class Polygon
     //! Plots the curve string 
     void draw(string, vector<Point<double>> &);
 
-    //!
-    void write(string, pair<vector<double>,vector<double>> &);
+    //! Write the results to a file
+    void save(string, pair<vector<double>,vector<double>> &);
 };
 
 #endif 

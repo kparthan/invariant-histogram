@@ -45,7 +45,7 @@ Polygon::Polygon(vector<Line<double>> &sides) : sides(sides)
  *  \param source a reference to a Polygon
  */
 Polygon::Polygon(const Polygon &source) : vertices(source.vertices),
-         samples(source.samples), sides(source.sides), lengths(source.lengths)
+         sides(source.sides), lengths(source.lengths)
 {}
 
 /*!
@@ -59,7 +59,6 @@ Polygon Polygon::operator=(const Polygon &source)
     vertices = source.vertices;
     sides = source.sides;
     lengths = source.lengths;
-    samples = source.samples;
   }
   return *this;
 }
@@ -134,10 +133,10 @@ int Polygon::getCurveIndex(double random, vector<double> &sample_probability)
 vector<Point<double>> Polygon::generateRandomPoints(int num_points)
 {
   srand(time(NULL));
-  //vector<Point<double>> samples;
+  vector<Point<double>> samples;
   vector<double> sample_probability = getSampleProbabilities();
   for (int i=0; i<num_points; i++) {
-    // randomly choose a side of the curve string
+    // randomly choose a side of the polygon 
     double random = rand() / (double) RAND_MAX;
     int curve_index = getCurveIndex(random,sample_probability);
 
@@ -151,43 +150,59 @@ vector<Point<double>> Polygon::generateRandomPoints(int num_points)
 }
 
 /*!
- *  \brief This method plots the curve string.
- *  \param file_name a string
+ *  \brief This method plots the polygon and shows its representative samples.
+ *  \param shape a string
+ *  \param samples a reference to a vector<Point<double>>
  */
-void Polygon::draw(string file_name, vector<Point<double>> &samples)
+void Polygon::draw(string shape, vector<Point<double>> &samples)
 {
-  string data = "test/" + file_name + ".actual";
-  ofstream data_file(data.c_str());
+  // generate data files
+  string actual_shape = "output/" + shape + ".actual";
+  ofstream file(actual_shape.c_str());
   double dt = 0.01;
   for (int i=0; i<sides.size(); i++) {
     for (double t=0; t<=1; t+=dt) {
       Point<double> p = sides[i].getPoint(t);
-      data_file << p.x() << " " << p.y() << endl;
+      file << p.x() << " " << p.y() << endl;
     }
   }
-  data_file.close();
-  string sample_data = "test/" + file_name + ".samples";
-  ofstream samples_file(sample_data.c_str());
+  file.close();
+  string samples_file = "output/" + shape + ".samples";
+  ofstream fp(samples_file.c_str());
   for (int i=0; i<samples.size(); i++) {
-    samples_file << samples[i].x() << " " << samples[i].y() << endl;
+    fp << samples[i].x() << " " << samples[i].y() << endl;
   }
-  samples_file.close();
+  fp.close();
+
+  // generate gnuplot script
+  ofstream script("script.plot");
+  script << "set terminal post eps" << endl;
+  script << "set title \"Polygon and its representative samples\"" << endl;
+  script << "set output \"output/" << shape << ".eps\"" << endl;
+  script << "set multiplot" << endl;
+  script << "plot \"" << actual_shape << "\" using 1:2 title"
+         << "'actual shape' with points lc rgb \"red\", \\" << endl;
+  script << "\"" << samples_file << "\" using 1:2 title"
+         << "'sampled points' with points lc rgb \"green\"" << endl;
+  script.close();
+  system("gnuplot -persist script.plot");
 }
 
 /*!
- *
+ *  \brief This function writes the results to a file
+ *  \param shape a string
+ *  \param results a reference to a pair<vector<double>,vector<double>>
  */
-void Polygon::write(string file, pair<vector<double>,vector<double>> &results)
+void Polygon::save(string shape, pair<vector<double>,vector<double>> &results)
 {
-  string file_name = "results/" + file + ".results";
-  ofstream fp (file_name.c_str());
+  string file_name = "output/" + shape + ".results";
+  ofstream file(file_name.c_str());
   vector<double> r = results.first;
-  vector<double> f = results.second;
-  assert(r.size() == f.size());
+  vector<double> fval = results.second;
+  assert(r.size() == fval.size());
   for (int i=0; i<r.size(); i++) {
-    fp << r[i] << " " << f[i] << endl;
+    file << r[i] << " " << fval[i] << endl;
   }
-  fp.close();
+  file.close();
 }
-
 
