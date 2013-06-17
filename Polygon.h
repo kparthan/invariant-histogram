@@ -1,17 +1,25 @@
-#ifndef POLYGON_H
-#define POLYGON_H
+#ifndef CURVE_STRING_H
+#define CURVE_STRING_H
 
 #include "Header.h"
-#include "Curve.h"
 
-class Polygon : public Curve
+class Polygon
 {
   private:
-    //! Vertices of the polygon
+    //! Vertices of the polygon 
     vector<Point<double>> vertices;
 
-    //! Sides of the polygon
-    vector<Line<Point<double>>> sides;
+    //! Sample points on the polygon 
+    vector<Point<double>> samples;
+
+    //! Set of line segments
+    vector<Line<double>> sides;
+
+    //! Lengths of the curves
+    vector<double> lengths;
+
+    //! Select a curve
+    int getCurveIndex(double, vector<double> &);
 
   public:
     //! Null constructor
@@ -21,7 +29,7 @@ class Polygon : public Curve
     Polygon(vector<Point<double>> &);
 
     //! Constructor
-    Polygon(vector<Line<Point<double>>> &);
+    Polygon(vector<Line<double>> &);
 
     //! Copy constructor
     Polygon(const Polygon &);
@@ -33,20 +41,23 @@ class Polygon : public Curve
     int getNumberOfVertices();
 
     //! Get number of sides
-    int getNumberOfSides();
+    int getNumberOfSegments();
 
-    //! Length of the polygon
+    //! Cumulative length of the sides forming the polygon 
     double length();
+
+    //! Sampling probabilities of the individual segments
+    vector<double> getSampleProbabilities();
 
     //! Generate random points
     vector<Point<double>> generateRandomPoints(int);
 
-    //!
-    double computeDistanceHistogram(int, double);
+    //! Plots the curve string 
+    void draw(string, vector<Point<double>> &);
 
-    //! Plots the polygon
-    void draw();
+    //!
+    void write(string, pair<vector<double>,vector<double>> &);
 };
 
-#endif
+#endif 
 

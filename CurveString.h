@@ -1,14 +1,22 @@
 #ifndef CURVE_STRING_H
 #define CURVE_STRING_H
 
+#include "Header.h"
+
 class CurveString
 {
   private:
     //! Vertices of the segments of the curves 
     vector<Point<double>> vertices;
 
+    //! Sample points on the curve string
+    vector<Point<double>> samples;
+
     //! Set of curves
-    vector<Curve<double>> curves;
+    vector<Curve<double>*> curves;
+
+    //! Lengths of the curves
+    vector<double> lengths;
 
     //! Select a curve
     int getCurveIndex(double, vector<double> &);
@@ -21,7 +29,10 @@ class CurveString
     CurveString(vector<Point<double>> &);
 
     //! Constructor
-    CurveString(vector<Curve<double>> &);
+    CurveString(vector<Curve<double>*> &);
+
+    //! Constructor
+    CurveString(vector<Curve<double>*> &, vector<double> &);
 
     //! Copy constructor
     CurveString(const CurveString &);
@@ -44,11 +55,8 @@ class CurveString
     //! Generate random points
     vector<Point<double>> generateRandomPoints(int);
 
-    //!
-    double computeDistanceHistogram(int, double);
-
-    //! Plots the polygon
-    void draw();
+    //! Plots the curve string 
+    void draw(string);
 };
 
 #endif 

@@ -8,10 +8,10 @@ DistanceHistogram::DistanceHistogram()
 
 /*!
  *  \brief This is a constructor module.
- *  \param curve_string a reference to a CurveString
+ *  \param polygon a reference to a Polygon
  */
-DistanceHistogram::DistanceHistogram(CurveString &curve_string) : 
-                   curve_string(curve_string)
+DistanceHistogram::DistanceHistogram(Polygon &polygon) : 
+                   polygon(polygon)
 {}
 
 /*!
@@ -19,7 +19,7 @@ DistanceHistogram::DistanceHistogram(CurveString &curve_string) :
  *  \param source a reference to a DistanceHistogram
  */
 DistanceHistogram::DistanceHistogram(const DistanceHistogram &source) :
-                   curve_string(source.curve_string), point_set(source.point_set)
+                   polygon(source.polygon), point_set(source.point_set)
 {}
 
 /*!
@@ -30,7 +30,7 @@ DistanceHistogram::DistanceHistogram(const DistanceHistogram &source) :
 DistanceHistogram DistanceHistogram::operator=(const DistanceHistogram &source)
 {
   if (this != &source) {
-    curve_string = source.curve_string;
+    polygon = source.polygon;
     point_set = source.point_set;
   }
   return *this;
@@ -43,15 +43,34 @@ DistanceHistogram DistanceHistogram::operator=(const DistanceHistogram &source)
  */
 void DistanceHistogram::constructSamples(int num_points)
 {
-  point_set = curve_string.generateRandomPoints(num_points);
+  point_set = polygon.generateRandomPoints(num_points);
 }
 
 /*!
- *  \brief This function counts the number of point_set that lie within a circle
+ *  \brief This function is used to construct the finite point set
+ *  to evaluate the distance histogram function
+ */
+void DistanceHistogram::constructSamples()
+{
+  int num_points = polygon.length() * POINTS_PER_UNIT;
+
+  constructSamples(num_points);
+}
+
+/*!
+ *
+ */
+vector<Point<double>> DistanceHistogram::getSamples()
+{
+  return point_set;
+}
+
+/*!
+ *  \brief This function counts the number of points that lie within a circle
  *  of a given radius.
  *  \param centre a reference to a Point<double>
  *  \param r a double
- *  \param number of internal point_set
+ *  \param number of internal points
  */
 int DistanceHistogram::computeNumberOfInternalPoints(Point<double> &centre,
                                                      double r)
@@ -76,7 +95,7 @@ vector<double> DistanceHistogram::computeLocalHistogram(double r)
 {
   vector<double> local_histogram(point_set.size());
   for (int i=0; i<point_set.size(); i++) {
-    int num_internal_points = computeNumberOfPointsWithinCircle(point_set[i],r);
+    int num_internal_points = computeNumberOfInternalPoints(point_set[i],r);
     local_histogram[i] = num_internal_points / (double) point_set.size();
   }
   return local_histogram;
@@ -92,7 +111,7 @@ double DistanceHistogram::computeGlobalHistogram(double r)
   double global_histogram = 0;
   vector<double> local_histogram = computeLocalHistogram(r);
   for (int i=0; i<point_set.size(); i++) {
-    global_histogram += local_histogram;
+    global_histogram += local_histogram[i];
   }
   return global_histogram / point_set.size();
 }
@@ -102,17 +121,20 @@ double DistanceHistogram::computeGlobalHistogram(double r)
  *  values of r
  *  \return the list of distance histogram values
  */
-vector<double> DistanceHistogram::computeGlobalHistogramValues()
+pair<vector<double>,vector<double>> DistanceHistogram::computeGlobalHistogramValues()
 {
-  vector<double> values(NUM_ITERATIONS,0);
-  double length = curve->length();
-  int delta_r = length / NUM_ITERATIONS;
-  double r = delta_r;
-  for (int i=0; i<NUM_ITERATIONS; i++) {
-    values[i] = computeGlobalHistogram(r);
-    r += delta_r;
+  double dr = 0.05;
+  double length = polygon.length();
+  vector<double> r_values;
+  double r = dr;
+  while (1) {
+    if (r > length) {
+      break;
+    }
+    r_values.push_back(r);
+    r += dr;
   }
-  return values;
+  return computeGlobalHistogramValues(r_values);
 }
 
 /*!
@@ -121,12 +143,19 @@ vector<double> DistanceHistogram::computeGlobalHistogramValues()
  *  \param r a reference to a vector<double>
  *  \return the list of distance histogram values
  */
-vector<double> DistanceHistogram::computeGlobalHistogramValues(vector<double> &r)
+pair<vector<double>,vector<double>> DistanceHistogram::computeGlobalHistogramValues(vector<double> &r)
 {
+  constructSamples();
+  //ofstream results("results/histogram");
   vector<double> values(r.size(),0);
   for (int i=0; i<r.size(); i++) {
     values[i] = computeGlobalHistogram(r[i]);
+    //results << r[i] << " " << values[i] << endl;
   }
-  return values;
+  //results.close();
+  pair<vector<double>,vector<double>> results;
+  results.first = r;
+  results.second = values;
+  return results;
 }
 

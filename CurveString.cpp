@@ -19,23 +19,46 @@ CurveString::CurveString(vector<Point<double>> &vertices) : vertices(vertices)
   // Default behaviour: constructs a curve string when a set of vertices are given
   for (int i=0; i<vertices.size()-1; i++) {
     Line<double> line(vertices[i],vertices[i+1]);
-    curves.push_back(line);
+    Curve<double> *curve = &line;
+    curves.push_back(curve);
+    lengths.push_back(line.length());
   }
+  cout << "done\n";
 }
 
 /*!
  *  \brief This is a constructor function.
  *  \param curves a reference to a vector<Line<Point<double>>>
  */
-CurveString::CurveString(vector<Curve<double>> &curves) : curves(curves)
+CurveString::CurveString(vector<Curve<double>*> &curves) : curves(curves)
 {
   if (curves.size() == 0) {
     cout << "No curves to construct the curve string ...";
     exit(1);
   }
-  vertices.push_back(curves[0].startPoint());
+  vertices.push_back(curves[0]->startPoint());
   for (int i=0; i<curves.size(); i++) {
-    vertices.push_back(curves[i].endPoint());
+    vertices.push_back(curves[i]->endPoint());
+    lengths.push_back(curves[i]->length());
+  }
+}
+
+/*!
+ *  \brief This is a constructor function.
+ *  \param curves a reference to a vector<Line<double>>
+ *  \param lengths a reference to a vector<double>
+ */
+CurveString::CurveString(vector<Curve<double>*> &curves,
+                         vector<double> &lengths) : lengths(lengths)
+{
+  assert(curves.size() == lengths.size());
+  if (curves.size() == 0) {
+    cout << "No curves to construct the curve string ...";
+    exit(1);
+  }
+  vertices.push_back(curves[0]->startPoint());
+  for (int i=0; i<curves.size(); i++) {
+    vertices.push_back(curves[i]->endPoint());
   }
 }
 
@@ -43,7 +66,7 @@ CurveString::CurveString(vector<Curve<double>> &curves) : curves(curves)
  *  \brief This module is used to create a copy of a CurveString object
  *  \param source a reference to a CurveString
  */
-CurveString::CurveString(const CurveString &source) : 
+CurveString::CurveString(const CurveString &source) : lengths(source.lengths), 
                          vertices(source.vertices), curves(source.curves) 
 {}
 
@@ -57,6 +80,7 @@ CurveString CurveString::operator=(const CurveString &source)
   if (this != &source) {
     vertices = source.vertices;
     curves = source.curves;
+    lengths = source.lengths;
   }
   return *this;
 }
@@ -85,30 +109,23 @@ int CurveString::getNumberOfSegments()
  */
 double CurveString::length()
 {
-  double sum = 0;
-  for (int i=0; i<curves.size(); i++) {
-    sum += curves[i].length(); 
+  double total_length = 0;
+  for (int i=0; i<lengths.size(); i++) {
+    total_length += lengths[i]; 
   }
-  return sum;
+  return total_length;
 }
 
 /*!
- *  \brief This method computes the sampling probabilities of each curve
- *  comprising the curve string
+ *  \brief This method computes the sampling probabilities of each curve.
  *  \return the list of sampling probabilities
  */
 vector<double> CurveString::getSampleProbabilities()
 {
-  vector<double> lengths;
-  double sum = 0;
-  for (int i=0; i<curves.size(); i++) {
-    double length = curves[i].length();
-    sum += length;
-    lengths.push_back(length);
-  }
+  double total_length = length();
   vector<double> sample_probability(curves.size(),0);
   for (int i=0; i<curves.size(); i++) {
-    sample_probability[i] = lengths[i] / sum;
+    sample_probability[i] = lengths[i] / total_length;
   }
   return sample_probability;
 }
@@ -138,7 +155,7 @@ int CurveString::getCurveIndex(double random, vector<double> &sample_probability
 vector<Point<double>> CurveString::generateRandomPoints(int num_points)
 {
   srand(time(NULL));
-  vector<Point<double>> samples;
+  //vector<Point<double>> samples;
   vector<double> sample_probability = getSampleProbabilities();
   for (int i=0; i<num_points; i++) {
     // randomly choose a side of the curve string
@@ -147,7 +164,7 @@ vector<Point<double>> CurveString::generateRandomPoints(int num_points)
 
     // randomly choose the parameter value \in [0,1]
     double t = rand() / (double) RAND_MAX;
-    Point<double> point_on_curve = curves[curve_index].getPoint(t);
+    Point<double> point_on_curve = curves[curve_index]->getPoint(t);
 
     samples.push_back(point_on_curve);
   }
@@ -155,24 +172,26 @@ vector<Point<double>> CurveString::generateRandomPoints(int num_points)
 }
 
 /*!
- *  \brief This function computes the distance histogram function for 
- *  the curve string.
- *  \param num_samples an integer
- *  \param r a double
- *  \return the histogram function value
- */
-double CurveString::computeDistanceHistogram(int num_samples, double r)
-{
-  vector<Point<double>> samples = generateRandomPoints(num_samples);
-  //DistanceHistogram histogram(samples);
-  //histogram.computeGlobalHistogram(r);
-}
-
-/*!
  *  \brief This method plots the curve string.
+ *  \param file_name a string
  */
-void CurveString::draw()
+void CurveString::draw(string file_name)
 {
-
+  string data = "test/" + file_name + ".actual";
+  ofstream data_file(data.c_str());
+  double dt = 0.01;
+  for (int i=0; i<curves.size(); i++) {
+    for (double t=0; t<=1; t+=dt) {
+      Point<double> p = curves[i]->getPoint(t);
+      data_file << p.x() << " " << p.y() << endl;
+    }
+  }
+  data_file.close();
+  string sample_data = "test/" + file_name + ".samples";
+  ofstream samples_file(sample_data.c_str());
+  for (int i=0; i<samples.size(); i++) {
+    samples_file << samples[i].x() << " " << samples[i].y() << endl;
+  }
+  samples_file.close();
 }
 

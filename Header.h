@@ -11,6 +11,7 @@
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+#include <cassert>
 #include <ctime>
 #include <thread>
 #include <chrono>
@@ -23,7 +24,7 @@
 #define PI boost::math::constants::pi<double>()
 #define ZERO std::numeric_limits<double>::epsilon()
 
-#define NUM_ITERATIONS 100
+#define POINTS_PER_UNIT 10
 
 #define SET 1 
 #define UNSET 0
